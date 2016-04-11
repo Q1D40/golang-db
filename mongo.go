@@ -125,6 +125,21 @@ func (this *Mongo) AddIndexUnionUnique(collectionName string, fieldNames []strin
 	return err
 }
 
+func (this *Mongo) AddIndex(collectionName string, fieldNames []string) error {
+	session, err := this.conn()
+	defer session.Close()
+	if err != nil {
+		log.Println(err)
+		return err
+	}
+	c := session.DB("").C(collectionName)
+	var index = mgo.Index{
+		Key: fieldNames,
+	}
+	err = c.EnsureIndex(index)
+	return err
+}
+
 func (this *Mongo) Create(collectionName string) error {
 	session, err := this.conn()
 	defer session.Close()
