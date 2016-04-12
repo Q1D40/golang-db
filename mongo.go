@@ -77,6 +77,50 @@ func (this *Mongo) Find(collectionName string, data interface{}, find bson.M, sk
 	return nil
 }
 
+func (this *Mongo) Count(collectionName string, find bson.M) (int, error) {
+	session, err := this.conn()
+	defer session.Close()
+	if err != nil {
+		log.Println(err)
+		return 0, err
+	}
+	c := session.DB("").C(collectionName)
+	n, err := c.Find(find).Count()
+	return n, err
+}
+
+func (this *Mongo) Remove(collectionName string, selector interface{}) error {
+	session, err := this.conn()
+	defer session.Close()
+	if err != nil {
+		log.Println(err)
+		return err
+	}
+	c := session.DB("").C(collectionName)
+	err = c.Remove(selector)
+	if err != nil {
+		log.Println(err)
+		return err
+	}
+	return nil
+}
+
+func (this *Mongo) Update(collectionName string, selector interface{}, update interface{}) error {
+	session, err := this.conn()
+	defer session.Close()
+	if err != nil {
+		log.Println(err)
+		return err
+	}
+	c := session.DB("").C(collectionName)
+	err = c.Update(selector, update)
+	if err != nil {
+		log.Println(err)
+		return err
+	}
+	return nil
+}
+
 func (this *Mongo) AddIndexTTL(collectionName string, fieldName string, ttl time.Duration) error {
 	session, err := this.conn()
 	defer session.Close()
