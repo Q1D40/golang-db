@@ -17,6 +17,10 @@ func NewMongo() *Mongo {
 	return &Mongo{}
 }
 
+var (
+	mgosess *mgo.Session
+)
+
 func (this *Mongo) conn() (*mgo.Session, error) {
 	user := beego.AppConfig.String("mongouser")
 	pass := beego.AppConfig.String("mongopass")
@@ -25,12 +29,16 @@ func (this *Mongo) conn() (*mgo.Session, error) {
 	host2 := beego.AppConfig.String("mongohost2")
 	port2 := beego.AppConfig.String("mongoport2")
 	db := beego.AppConfig.String("mongodb")
-	session, err := mgo.Dial("mongodb://" + user + ":" + pass + "@" + host1 + ":" + port1 + "," + host2 + ":" + port2 + "/" + db + "")
-	if err != nil {
-		return session, err
+
+	var err error
+	if mgosess == nil {
+		mgosess, err = mgo.Dial("mongodb://" + user + ":" + pass + "@" + host1 + ":" + port1 + "," + host2 + ":" + port2 + "/" + db + "")
+		if err != nil {
+			return mgosess, err
+		}
+		//mgosess.SetMode(mgo.Monotonic, true)
 	}
-	session.SetMode(mgo.Monotonic, true)
-	return session, err
+	return mgosess.Clone(), err
 }
 
 func (this *Mongo) Insert(collectionName string, data interface{}) error {
